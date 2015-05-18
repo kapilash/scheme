@@ -3,7 +3,7 @@
 
 name:                pscheme-parser
 version:             0.1.0.0
-synopsis:            R5R6 Scheme parser
+synopsis:            RSR6 Scheme parser
 -- description:         
 homepage:            https://github.com/kapilash/scheme
 license:             Apache-2.0

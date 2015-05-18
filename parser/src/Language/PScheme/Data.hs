@@ -5,3 +5,6 @@ data Definition = Definition String String
 
 data Module = Module String [Definition]
             deriving (Eq,Show)
+
+newtype Ident = Ident String
+    deriving (Eq,Show,Ord)
