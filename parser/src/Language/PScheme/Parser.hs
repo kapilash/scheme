@@ -2,8 +2,6 @@ module Language.PScheme.Parser where
 
 import Text.ParserCombinators.Parsec
 import Language.PScheme.Data
-import qualified Text.Parsec.Token as P    
-import Text.Parsec.Language
 import Data.Char(isSpace)
 
 eol' = try (string "\n\r")
@@ -29,8 +27,15 @@ blockComment = do
   return ()
 
 gap = many1 gap' 
-      where gap' = skipMany1 space
-                   <|> try lineComment
-                   <|> blockComment
-                   <|> eol
-                   <?> "Comment or whitespace"
+
+gap' = skipMany1 space
+       <|> try lineComment
+       <|> blockComment
+       <|> eol
+       <?> "Comment or whitespace"
+
+lexeme p = do
+  x <- p
+  many1 gap'
+  return x
+
