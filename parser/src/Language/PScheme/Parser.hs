@@ -1,10 +1,13 @@
 module Language.PScheme.Parser where
 
-import Text.ParserCombinators.Parsec
+import Text.Parsec
 import Language.PScheme.Data
 import Data.Char(isSpace)
 import Text.Parsec.String as P
-
+import Text.Parsec.Language (emptyDef,haskellDef)
+import qualified Text.Parsec.Token  as PT
+import Data.Functor.Identity
+       
 eol' = try (string "\n\r")
       <|> try (string "\r\n")
       <|> string "\n"
@@ -35,11 +38,11 @@ gap' = skipMany1 space
        <|> eol
        <?> "Comment or whitespace"
 
-lexeme p = do
+{-lexeme p = do
   x <- p
   pos <- getPosition
   many1 gap'
-  return (x,pos)
+  return (x,pos)-}
 
 begin ::  P.Parser (Char,SourcePos)
 begin = do
@@ -66,5 +69,25 @@ wrapped p = do
     pos2 <- end c
     return (pos1, res, pos2)
 
-silly :: P.Parser (Char,SourcePos)
-silly = lexeme (char 'a')
+
+pscheme :: PT.GenLanguageDef String u Identity
+pscheme = emptyDef {
+        PT.reservedNames = ["let","letrec","cond","def-macro","if","let*","def-struct","def-macro","define","lambda","syntax","def-module"],
+        PT.commentStart = "#|",
+        PT.commentEnd = "|#",
+        PT.commentLine = ";",
+        PT.nestedComments = True,
+        PT.identStart = upper <|> oneOf "!$%&*+./<=>?@\\|-~",
+        PT.identLetter    = alphaNum <|> oneOf "!$%&*+./<=>?@\\|-~",
+        PT.opStart = char ':',
+        PT.opLetter  = oneOf ":!$%&*+./<=>?@\\|-~",
+        PT.reservedOpNames = [".","^","#\\"]   
+        }
+
+        
+lexer = PT.makeTokenParser pscheme
+
+parens = PT.parens lexer
+braces = PT.braces lexer
+identifier = (PT.identifier  lexer) <|> PT.operator lexer
+
