@@ -72,9 +72,9 @@ wrapped p = do
 
 pscheme :: PT.GenLanguageDef String u Identity
 pscheme = emptyDef {
-        PT.reservedNames = ["let","letrec","cond","def-macro","if","let*","def-struct","def-macro","define","lambda","syntax","def-module"],
-        PT.commentStart = "#|",
-        PT.commentEnd = "|#",
+        PT.reservedNames = ["Let","Cond","Def-Macro","IF","Def-Struct","Def-Macro","Define","Lambda","syntax","Def-Module"],
+        PT.commentStart = "/*",
+        PT.commentEnd = "*/",
         PT.commentLine = ";",
         PT.nestedComments = True,
         PT.identStart = upper <|> oneOf "!$%&*+./<=>?@\\|-~",
