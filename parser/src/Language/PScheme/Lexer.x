@@ -1,5 +1,7 @@
 {
-    module Language.PScheme.Lexer where
+module Language.PScheme.Lexer where
+
+import Language.PScheme.Tokens where
 }
 
 %wrapper "basic-posn"
