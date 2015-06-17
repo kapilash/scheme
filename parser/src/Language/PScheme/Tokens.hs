@@ -5,24 +5,28 @@ data Token = OpenSqBrace !Int !Int
            | CloseSqBrace !Int !Int
            | OpenBracket !Int !Int
            | CloseBracket !Int !Int
-           | R6RSChar Char !Int !Int
-           | R6RSString String !Int !Int
-           | R6RSIdent String !Int !Int
-           | R6RSNumber Integer
-           | R6RSRational (Integer, Integer) !Int !Int
-           | R6RSDouble Double !Int !Int
-           | R6RSComplex (Double, Double) !Int !Int
-           | VectorOpen !Int !Int
-           | ByteVectorOpen !Int !Int
-           | Quote !Int !Int
+           | PChar Char !Int !Int
+           | PString String !Int !Int
+           | PIdent String !Int !Int
+           | PNumber Integer
            | BackQuote !Int !Int
            | Comma !Int !Int
            | CommaAT !Int !Int
            | Dot !Int !Int
-           | HashQuote !Int !Int
-           | HashBackQuote !Int !Int
-           | HashComma !Int !Int
-           | HashCommaAt !Int !Int
+           | DollarId String !Int !Int
+           | DefMacro !Int !Int
+           | DefStruct !Int !Int
+           | DefFunc !Int !Int
+           | DefProc !Int !Int
+           | OpenBrace !Int !Int
+           | CloseBrace !Int !Int
+           | PLet !Int !Int
+           | PLambda !Int !Int
+           | PIf !Int !Int
+           | PElse !Int !Int
+           | PCond !Int !Int
+           | PNil !Int !Int
+           | PTrue !Int !Int
              deriving (Typeable, Data)
 
                          
