@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright: Hemanth Kapila (2016).
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Text;
 
 namespace MuScheme.Lexer
@@ -14,7 +17,7 @@ namespace MuScheme.Lexer
         {
             _isEndChar = isEndChar;
             _tokenType = tokenType;
-            isEndOptional = _isEndOptional;
+            _isEndOptional = isEndOptional;
             _description = description;
         }
 
@@ -43,43 +46,69 @@ namespace MuScheme.Lexer
         }
     }
 
-    class TillPairLexer : ILexer
+    class SymmetricPairLexer : ILexer
     {
-        private readonly char _penultimate;
-        private readonly char _final;
+        private readonly char _first;
+        private readonly char _second;
         private readonly TokenType _tokenType;
         private string _description;
 
-        public TillPairLexer(char penultimate, char final, string description, TokenType tokenType)
+        public SymmetricPairLexer(char first, char second, string description, TokenType tokenType)
         {
-            _penultimate = penultimate;
-            _final = final;
+            _first = first;
+            _second = second;
             _tokenType = tokenType;
             _description = description;
         }
 
+        /// <summary>
+        ///  assumption - when lexer is called, reader.Current == _second  
+        /// </summary>
         public Token Scan(IReader reader)
         {
-            var strb = new StringBuilder(reader.Current);
-            bool foundEnd = false;
+            // Debug.assert(reader.Current == _second, "expected to be called when Debug.Assert is second");
+            var strb = new StringBuilder();
+            int level = 1;
             int beginLine = reader.Line;
             int beginCol = reader.Column;
             while (reader.MoveNext())
             {
-                if (_isEndChar(reader.Current))
+                if (reader.Current == _second)
                 {
-                    foundEnd = true;
-                    break;
+                    if (!reader.MoveNext())
+                    {
+                        throw new ScannerException($"Unexpected end of file. Expected {_second}. Runaway {_description} from ({beginLine}, {beginCol}");
+                    }
+                    if (reader.Current == _first)
+                    {
+                        level = level - 1;
+                        if (level == 0)
+                        {
+                            return new Token(_tokenType, beginLine, beginCol, strb.ToString());
+                        }
+                    }
+                    else
+                    {
+                        strb.Append(_second);
+                        strb.Append(reader.Current);
+                    }
                 }
-                strb.Append(reader.Current);
+                else
+                {
+                    strb.Append(reader.Current);
+                    if (reader.Current == _first)
+                    {
+                        if (reader.MoveNext() && reader.Current == _second)
+                        {
+                            strb.Append(reader.Current);
+                            level++;
+                            
+                        }
+                    }
+                }
             }
 
-            if (!foundEnd && !_isEndOptional)
-            {
-                throw new ScannerException("Runaway " + _description, beginLine, beginCol);
-            }
-
-            return new Token(_tokenType, beginLine, beginCol, strb.ToString());
+            throw new ScannerException("Runaway " + _description, beginLine, beginCol);
         }
     }
 }
