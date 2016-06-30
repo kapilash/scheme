@@ -9,30 +9,34 @@ namespace MuScheme.Lexer
     public abstract class Scanner : IEnumerator<Token>
     {
         private readonly List<ILexer> _lexers;
-        private TextReader _reader;
+        private readonly ILexer _defaultLexer;
+        private IReader _reader;
         private int _nextChar;
+        private Token _nextToken;
 
-        internal Scanner(IList<ILexer> lexers, string text)
+        internal Scanner(IList<ILexer> lexers, ILexer defaultLexer, string text) : this(lexers, defaultLexer, new StringReader(text))
         {
-            _lexers = new List<ILexer>();
-            _lexers.AddRange(lexers);
-            _reader = new StringReader(text);
-            _nextChar = -1;
         }
 
-        internal Scanner(IList<ILexer> lexers, Stream stream)
+        internal Scanner(IList<ILexer> lexers, ILexer defaultLexer, Stream stream) : this(lexers, defaultLexer, new StreamReader(stream))
+        {
+        }
+
+        private Scanner(IList<ILexer> lexers, ILexer defaultLexer, TextReader reader)
         {
             _lexers = new List<ILexer>();
             _lexers.AddRange(lexers);
-            _reader = new StreamReader(stream);
+            _defaultLexer = defaultLexer;
+            _reader = new Reader(reader);
             _nextChar = -1;
+            _nextToken = null;
         }
 
         public Token Current
         {
             get
             {
-                throw new NotImplementedException();
+                return _nextToken;
             }
         }
 
@@ -52,7 +56,20 @@ namespace MuScheme.Lexer
 
         public bool MoveNext()
         {
-            throw new NotImplementedException();
+            _nextToken = null;
+            if (!_reader.MoveNext())
+            {
+                return false;
+            }
+
+            int current = Convert.ToInt32(_reader.Current);
+            ILexer lexer = _defaultLexer;
+            if (current < _lexers.Count)
+            {
+                lexer = _lexers[current];
+            }
+            _nextToken = lexer.Scan(_reader);
+            return true;
         }
 
         public void Reset()
