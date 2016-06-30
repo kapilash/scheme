@@ -2,7 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-namespace MuScheme.Lexer
+namespace CShark.Lexer
 {
     internal interface ILexer
     {

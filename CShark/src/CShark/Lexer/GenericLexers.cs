@@ -4,7 +4,7 @@
 using System;
 using System.Text;
 
-namespace MuScheme.Lexer
+namespace CShark.Lexer
 {
     class TillConditionLexer : ILexer
     {

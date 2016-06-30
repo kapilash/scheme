@@ -3,7 +3,7 @@
 
 using System;
 
-namespace MuScheme.Lexer
+namespace CShark.Lexer
 {
     public class ScannerException : Exception
     {

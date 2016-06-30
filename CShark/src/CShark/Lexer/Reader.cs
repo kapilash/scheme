@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace MuScheme.Lexer
+namespace CShark.Lexer
 {
     interface IReader : IEnumerator<char>
     {

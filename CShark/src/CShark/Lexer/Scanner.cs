@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace MuScheme.Lexer
+namespace CShark.Lexer
 {
     public abstract class Scanner : IEnumerator<Token>
     {

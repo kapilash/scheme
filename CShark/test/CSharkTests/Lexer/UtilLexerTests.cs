@@ -4,7 +4,7 @@
 using System;
 using Xunit;
 
-using MuScheme.Lexer;
+using CShark.Lexer;
 namespace CSharkTests.Lexer
 {
     public class UtilLexerTests
