@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{06F2B70D-D4E8-415D-ACE1-3C52CC2A61AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8C7B6433-1724-43C0-B2FB-16B40643B292}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "MuScheme", "src\MuScheme\MuScheme.xproj", "{781F2FEA-B500-4C1F-AC9C-B24CC2BC73BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{781F2FEA-B500-4C1F-AC9C-B24CC2BC73BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{781F2FEA-B500-4C1F-AC9C-B24CC2BC73BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{781F2FEA-B500-4C1F-AC9C-B24CC2BC73BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{781F2FEA-B500-4C1F-AC9C-B24CC2BC73BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{781F2FEA-B500-4C1F-AC9C-B24CC2BC73BC} = {06F2B70D-D4E8-415D-ACE1-3C52CC2A61AB}
+	EndGlobalSection
+EndGlobal
