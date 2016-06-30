@@ -13,13 +13,13 @@ namespace CShark.Lexer
         int Line { get; }
         int Column { get; }
         void Revert(char c);
-        void Revert(string s);
     }
 
     class Reader : IReader
     {
         private readonly TextReader _reader;
         private readonly Stack<char> _stack;
+        private readonly Stack<int> _colStack;
         private char _next;
         private int _line;
         private int _column;
@@ -28,6 +28,7 @@ namespace CShark.Lexer
         {
             _reader = reader;
             _stack = new Stack<char>();
+            _colStack = new Stack<int>();
             _next = Char.MinValue;
             _line = 1;
             _column = 0;
@@ -36,6 +37,7 @@ namespace CShark.Lexer
         private void IncrementLine()
         {
             _line++;
+            _colStack.Push(_column);
             _column = 0;
         }
 
@@ -72,15 +74,17 @@ namespace CShark.Lexer
 
         public void Revert(char c)
         {
-            _stack.Push(c);
-        }
-
-        public void Revert(string s)
-        {
-            for(int i=s.Length-1; i>=0; i--)
+            _column--;
+            if (c == '\n')
             {
-                _stack.Push(s[i]);
+                _line--;
+                if (_colStack.Count > 0)
+                {
+                    _column = _colStack.Pop();
+                }
             }
+
+            _stack.Push(c);
         }
 
         public bool MoveNext()
@@ -91,6 +95,7 @@ namespace CShark.Lexer
             if (_stack.Count > 0)
             {
                 _next = _stack.Pop();
+                _column++;
                 return true;
             }
             int i = _reader.Read();
@@ -100,6 +105,7 @@ namespace CShark.Lexer
             }
 
             _next = Convert.ToChar(i);
+            _column++;
             if (_next == '\n')
             {
                 IncrementLine();
