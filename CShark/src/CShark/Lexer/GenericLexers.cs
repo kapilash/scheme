@@ -3,6 +3,7 @@
 
 using System;
 using System.Text;
+using System.Diagnostics;
 
 namespace CShark.Lexer
 {
@@ -46,6 +47,38 @@ namespace CShark.Lexer
         }
     }
 
+    class WhileLexer : ILexer
+    {
+        private readonly Predicate<char> _predicate;
+        private readonly TokenType _tokenType;
+        private string _description;
+
+        public WhileLexer(Predicate<char> isEndChar, string description, TokenType tokenType)
+        {
+            _predicate = isEndChar;
+            _tokenType = tokenType;
+            _description = description;
+        }
+
+        public Token Scan(IReader reader)
+        {
+            var strb = new StringBuilder(reader.Current);
+            int beginLine = reader.Line;
+            int beginCol = reader.Column;
+            while (reader.MoveNext())
+            {
+                if (!_predicate(reader.Current))
+                {
+                    reader.Revert(reader.Current);
+                    break;
+                }
+                strb.Append(reader.Current);
+            }
+
+            return new Token(_tokenType, beginLine, beginCol, strb.ToString());
+        }
+    }
+    
     class SymmetricPairLexer : ILexer
     {
         private readonly char _first;
@@ -66,7 +99,7 @@ namespace CShark.Lexer
         /// </summary>
         public Token Scan(IReader reader)
         {
-            // Debug.assert(reader.Current == _second, "expected to be called when Debug.Assert is second");
+            Debug.Assert(reader.Current == _second, "expected to be called when Debug.Assert is second");
             var strb = new StringBuilder();
             int level = 1;
             int beginLine = reader.Line;
