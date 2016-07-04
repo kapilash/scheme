@@ -10,9 +10,9 @@ namespace CShark.Lexer
         private readonly TokenType _tokenType;
         private readonly int _line;
         private readonly int _column;
-        private readonly string _text;
+        private readonly object _text;
 
-        public Token(TokenType tokenType, int line, int column, string text)
+        public Token(TokenType tokenType, int line, int column, object text)
         {
             _tokenType = tokenType;
             _line = line;
@@ -23,7 +23,7 @@ namespace CShark.Lexer
         public TokenType TokenType { get { return _tokenType; } }
         public int Line { get { return _line; } }
         public int Column { get { return _column; } }
-        public string Text { get { return _text; } }
+        public object Text { get { return _text; } }
 
         public override string ToString()
         {
