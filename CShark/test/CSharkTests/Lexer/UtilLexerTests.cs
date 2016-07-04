@@ -37,6 +37,7 @@ namespace CSharkTests.Lexer
                     var inputStr = $"{name}{delim}";
                     using (IReader reader = new Reader(new StringReader(inputStr)))
                     {
+                        Assert.True(reader.MoveNext());
                         Token t = lexer.Scan(reader);
                         Assert.NotNull(t);
                         Assert.Equal(1, t.Line);
@@ -61,12 +62,81 @@ namespace CSharkTests.Lexer
                 var inputStr = $"{name}";
                 using (IReader reader = new Reader(new StringReader(inputStr)))
                 {
+                    Assert.True(reader.MoveNext());
                     Token t = lexer.Scan(reader);
                     Assert.NotNull(t);
                     Assert.Equal(1, t.Line);
                     Assert.Equal(name, t.Text);
                     Assert.False(reader.MoveNext());
                 }
+            }
+        }
+
+        [Fact]
+        public void PairDelimitedLexer_BlockComment_ScanSuccess()
+        {
+            ILexer lexer = new PairDelimitedLexer('/', '*', "block comment", TokenType.Ignorable);
+            string comment = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890\n!@#$%^&*(){}':;'?/.<,~\n";
+            string inputStr = $"*{comment}*/_";
+            using (IReader reader = new Reader(new StringReader(inputStr)))
+            {
+                Assert.True(reader.MoveNext());
+                Token t = lexer.Scan(reader);
+                Assert.NotNull(t);
+                Assert.Equal(TokenType.Ignorable, t.TokenType);
+                Assert.Equal(1, t.Line);
+                Assert.Equal(1, t.Column);
+                Assert.Equal(comment, t.Text);
+                Assert.True(reader.MoveNext());
+                Assert.Equal('_', reader.Current);
+                Assert.Equal(4, reader.Line);
+            }
+        }
+
+        [Fact]
+        public void PairDelimitedLexer_NestedBlockComment_ScanSuccess()
+        {
+            ILexer lexer = new PairDelimitedLexer('/', '*', "block comment", TokenType.Ignorable);
+            string comment = "ABCDEFGHIJK/*LMNOPQRSTUVWXYZ\n1234567890\n!@#$%^&*(){}':;'?/.*/<,~\n";
+            string inputStr = $"*{comment}*/_";
+            using (IReader reader = new Reader(new StringReader(inputStr)))
+            {
+                Assert.True(reader.MoveNext());
+                Token t = lexer.Scan(reader);
+                Assert.NotNull(t);
+                Assert.Equal(TokenType.Ignorable, t.TokenType);
+                Assert.Equal(1, t.Line);
+                Assert.Equal(1, t.Column);
+                Assert.Equal(comment, t.Text);
+                Assert.True(reader.MoveNext());
+                Assert.Equal('_', reader.Current);
+                Assert.Equal(4, reader.Line);
+            }
+        }
+
+        [Fact]
+        public void PairDelimitedLexer_BlockCommentEOF_ScanFailure()
+        {
+            ILexer lexer = new PairDelimitedLexer('/', '*', "block comment", TokenType.Ignorable);
+            string comment = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n1234567890\n!@#$%^&*(){}':;'?/.<,~\n";
+            string inputStr = $"*{comment}*_/";
+            using (IReader reader = new Reader(new StringReader(inputStr)))
+            {
+                Assert.True(reader.MoveNext());
+                Assert.Throws<ScannerException>(() => lexer.Scan(reader));
+            }
+        }
+
+        [Fact]
+        public void PairDelimitedLexer_NestedBlockCommentEOF_ScanFailure()
+        {
+            ILexer lexer = new PairDelimitedLexer('/', '*', "block comment", TokenType.Ignorable);
+            string comment = "ABCDEFGHIJK/*LMNOPQRSTUVWXYZ\n1234567890\n!@#$%^&*(){}':;'?/.*/<,~\n";
+            string inputStr = $"*{comment}*_/";
+            using (IReader reader = new Reader(new StringReader(inputStr)))
+            {
+                Assert.True(reader.MoveNext());
+                Assert.Throws<ScannerException>(() => lexer.Scan(reader));
             }
         }
     }

@@ -62,7 +62,8 @@ namespace CShark.Lexer
 
         public Token Scan(IReader reader)
         {
-            var strb = new StringBuilder(reader.Current);
+            var strb = new StringBuilder();
+            strb.Append(reader.Current);
             int beginLine = reader.Line;
             int beginCol = reader.Column;
             while (reader.MoveNext())
@@ -78,15 +79,20 @@ namespace CShark.Lexer
             return new Token(_tokenType, beginLine, beginCol, strb.ToString());
         }
     }
-    
-    class SymmetricPairLexer : ILexer
+
+    /// <summary>
+    ///   Lexer to scan tokens that are delimited by a pair of characters.
+    ///   c1 c2 ..... c2 c1.
+    ///   This lexer supports nested tokens.
+    /// </summary>
+    class PairDelimitedLexer : ILexer
     {
         private readonly char _first;
         private readonly char _second;
         private readonly TokenType _tokenType;
         private string _description;
 
-        public SymmetricPairLexer(char first, char second, string description, TokenType tokenType)
+        public PairDelimitedLexer(char first, char second, string description, TokenType tokenType)
         {
             _first = first;
             _second = second;
@@ -99,7 +105,7 @@ namespace CShark.Lexer
         /// </summary>
         public Token Scan(IReader reader)
         {
-            Debug.Assert(reader.Current == _second, "expected to be called when Debug.Assert is second");
+            Debug.Assert(reader.Current == _second, $"expected to be called when {_second} is Current but found {reader.Current}");
             var strb = new StringBuilder();
             int level = 1;
             int beginLine = reader.Line;
@@ -119,6 +125,11 @@ namespace CShark.Lexer
                         {
                             return new Token(_tokenType, beginLine, beginCol, strb.ToString());
                         }
+                        else
+                        {
+                            strb.Append(_second);
+                            strb.Append(reader.Current);
+                        }
                     }
                     else
                     {
@@ -131,11 +142,13 @@ namespace CShark.Lexer
                     strb.Append(reader.Current);
                     if (reader.Current == _first)
                     {
-                        if (reader.MoveNext() && reader.Current == _second)
+                        if (reader.MoveNext())
                         {
                             strb.Append(reader.Current);
-                            level++;
-                            
+                            if (reader.Current == _second)
+                            {
+                                level++;
+                            }
                         }
                     }
                 }
