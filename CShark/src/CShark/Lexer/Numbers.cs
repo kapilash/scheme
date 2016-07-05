@@ -10,6 +10,133 @@ namespace CShark.Lexer
 {
     static class NumberLexer
     {
+        internal static void AppendTill(IReader reader, Predicate<char> predicate, StringBuilder builder)
+        {
+            while(reader.MoveNext())
+            {
+                if (predicate(reader.Current))
+                {
+                    builder.Append(reader.Current);
+                }
+                else {
+                    reader.Revert(reader.Current);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        ///   mantissa is of the form [0-9]*([eE][+-]?[0-9]+)?
+        /// </summary>
+        internal static double ReadMantissa(IReader reader, string prefix)
+        {
+            var builder = new StringBuilder();
+            builder.Append(prefix);
+            builder.Append('.');
+            AppendTill(reader, (c) => c >= '0' && c <= '9', builder);
+            if (reader.MoveNext())
+            {
+                if (reader.Current == 'e' || reader.Current == 'E')
+                {
+                    builder.Append('E');
+                    if (reader.MoveNext())
+                    {
+                        if (reader.Current == '+' || reader.Current == '-')
+                        {
+                            builder.Append(reader.Current);
+                        }
+                    }
+                }
+                else
+                {
+                    reader.Revert(reader.Current);
+                }
+            }
+
+            AppendTill(reader, (c) => c >= '0' && c <= '9', builder);
+            return Convert.ToDouble(builder.ToString());
+        }
+
+        /*
+        private static Token ReadSuffix(IReader reader, int numberBase, int line, int column, UInt64 value)
+        {
+            var tokenType = TokenType.IntConstant;
+            object value = null;
+
+            switch (reader.Current)
+            {
+            case 'd':
+            case 'D': {
+                return new Token(TokenType.DoubleConstant, line, column, Convert.ToDouble(value));
+            }
+                
+            case 'f':
+            case 'F': {
+                return new Token(TokenType.FloatConstant, line, column, Convert.ToFloat(value));
+            }
+
+            case 'l':
+            case 'L': {
+                if (reader.MoveNext())
+                {
+                    if(reader.Current == 'u' || reader.Current == 'U')
+                    {
+                        return new Token(TokenType.ULongConstant, line, column, value);
+                    }
+
+                    reader.Revert(reader.Current);
+                }
+
+                return new Token(TokenType.LongConstant, line, column, Convert.ToInt64(value));
+            }
+            case 's':
+            case 'S': {
+                if (reader.MoveNext())
+                {
+                    if (reader.Current == 'u' || reader.Current == 'U')
+                    {
+                        return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(value));
+                    }
+
+                    reader.Revert(reader.Current);
+                }
+
+                return new Token(TokenType.ShortConstant, line, column, Convert.ToInt16(value));
+            }
+            case 'u':
+            case 'U': {
+                if (reader.MoveNext())
+                {
+                    if (reader.Current == 's' || reader.Current == 'S')
+                    {
+                        return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(value));
+                    }
+
+                    if (reader.Current == 'l' || reader.Current == 'L')
+                    {
+                        return new Token(TokenType.LongConstant, line, column, Convert.ToInt64(value));
+                    }
+                    reader.Revert(reader.Current);
+                }
+
+                return new Token(TokenType.UIntConstant, line, column, Convert.ToInt32(value));
+            }
+            case '.' : {
+                double dVal = Convert.ToDouble(value);
+                double next = 0;
+                while (reader.MoveNext())
+                {
+                    
+                }
+            }
+            default: {
+                reader.Revert(reader.Current);
+                break;
+            }
+            }
+            
+        }*/
+
         private static TokenType ReadSuffix(IReader reader)
         {
             if (reader.Current == 'd' || reader.Current == 'D')
