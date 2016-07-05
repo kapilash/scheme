@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace CShark.Lexer
 {
-    static class NumberLexer
+    static class NumberUtils
     {
         internal static void AppendTill(IReader reader, Predicate<char> predicate, StringBuilder builder)
         {
@@ -142,16 +142,13 @@ namespace CShark.Lexer
 
             return new Lexer.Token(TokenType.IntConstant, line, column, Convert.ToInt32(text, fromBase));
         }
-    }
 
-    internal class ZeroLexer : ILexer
-    {
-        private Token ScanDouble(IReader reader, int line, int column)
+        internal static Token ScanDouble(IReader reader, int line, int column)
         {
             double dbl = 0d;
             try
             {
-                dbl = NumberLexer.ReadMantissa(reader, "0");
+                dbl = NumberUtils.ReadMantissa(reader, "0");
             }
             catch (FormatException f)
             {
@@ -180,7 +177,10 @@ namespace CShark.Lexer
 
             return new Token(TokenType.DoubleConstant, line, column, dbl);
         }
+    }
 
+    internal class ZeroLexer : ILexer
+    {
         public Token Scan(IReader reader)
         {
             int line = reader.Line;
@@ -189,7 +189,7 @@ namespace CShark.Lexer
             {
                 if (reader.Current == '.')
                 {
-                    return ScanDouble(reader, line, column);
+                    return NumberUtils.ScanDouble(reader, line, column);
                 }
                 else if (reader.Current == 'x' || reader.Current == 'X')
                 {
@@ -199,12 +199,12 @@ namespace CShark.Lexer
                     }
 
                     var builder = new StringBuilder();
-                    NumberLexer.AppendTill(reader, (c) => (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'), builder);
+                    NumberUtils.AppendTill(reader, (c) => (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'), builder);
                     if (reader.MoveNext())
                     {
                         try
                         {
-                            return NumberLexer.ContinueWithSuffix(reader, 16, line, column, builder.ToString());
+                            return NumberUtils.ContinueWithSuffix(reader, 16, line, column, builder.ToString());
                         }
                         catch (FormatException f)
                         {
@@ -224,7 +224,39 @@ namespace CShark.Lexer
         }
     }
 
-    public class Numbers
+    internal class NumberLexer : ILexer
     {
+        public Token Scan(IReader reader)
+        {
+            int line = reader.Line;
+            int column = reader.Column;
+            var builder = new StringBuilder();
+            NumberUtils.AppendTill(reader, (c) => c >= '0' && c <= '9', builder);
+            if (reader.MoveNext())
+            {
+                if (reader.Current == '.')
+                {
+                    return NumberUtils.ScanDouble(reader, line, column);
+                }
+
+                try
+                {
+                    return NumberUtils.ContinueWithSuffix(reader, 16, line, column, builder.ToString());
+                }
+                catch(FormatException f)
+                {
+                    throw new ScannerException(f.Message, line, column);
+                }
+            }
+
+            try
+            {    
+                return  new Token(TokenType.IntConstant, line, column, Convert.ToInt32(builder.ToString()));
+            }
+            catch(FormatException f)
+            {
+                throw new ScannerException(f.Message, line, column);
+            }
+        }
     }
 }

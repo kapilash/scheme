@@ -40,7 +40,7 @@ namespace CSharkTests.Lexer
 			using (IReader reader = new Reader(new StringReader(mant + end)))
 			{
 			    Assert.True(reader.MoveNext());
-			    double actual = NumberLexer.ReadMantissa(reader, pref);
+			    double actual = NumberUtils.ReadMantissa(reader, pref);
 			    Assert.True(reader.MoveNext());
 			    Assert.Equal(end, reader.Current);
 			    Assert.Equal(expectedDouble, actual);
@@ -63,7 +63,7 @@ namespace CSharkTests.Lexer
 		    using (IReader reader = new Reader(new StringReader(mant)))
 		    {
 			Assert.True(reader.MoveNext());
-			Assert.Throws<FormatException>(() => NumberLexer.ReadMantissa(reader, pref));
+			Assert.Throws<FormatException>(() => NumberUtils.ReadMantissa(reader, pref));
 		    }
 		}
 	    }
@@ -86,7 +86,7 @@ namespace CSharkTests.Lexer
 			using (IReader reader = new Reader(new StringReader(mant + end)))
 			{
 			    Assert.True(reader.MoveNext());
-			    double actual = NumberLexer.ReadMantissa(reader, pref);
+			    double actual = NumberUtils.ReadMantissa(reader, pref);
 			    Assert.True(reader.MoveNext());
 			    Assert.Equal(end, reader.Current);
 			    Assert.Equal(expected, Convert.ToSingle(actual));
