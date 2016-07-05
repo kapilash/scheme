@@ -10,6 +10,19 @@ namespace CSharkTests.Lexer
 {
     public class NumberLexerTests
     {
+        public readonly static object[][] UIntHexaDecimals = {
+            new object[] { "0X123u", 0X123u },
+            new object[] { "0XFFFu", 0XFFFu },
+            new object[] { "0XfffU", 0XfffU },
+            new object[] { "0XaaaU", 0XaaaU },
+            new object[] { "OXAAAu", 0XAAAu },
+            new object[] { "0xaaau", 0xaaau },
+            new object[] { "0XAaBbCcU", 0XAaBbCcU },
+            new object[] { "0xaAbBcCu", 0xaAbBcCu },
+            new object[] { "0x1239U", 0x1239U },
+            new object[] { "0X1239u", 0X1239u }
+        };
+
         [Fact]
         public void ValidMantissa_ReadMantissa_Double()
         {
@@ -121,22 +134,224 @@ namespace CSharkTests.Lexer
 	[Fact]
 	public void ZeroLexer_IntHexadecimals_Success()
 	{
-	    string[] hexes = new string[] { "0X123", "0XFFF", "0Xfff", "0Xaaa",
-					    "0XAAA", "0xaaa", "0xAAA", "0XAaBbCc",
-					    "0xaAbBcC", "0x1239", "0X1239"};
-	    var zeroLexer = new ZeroLexer();
-	    foreach (var hex in hexes)
-	    {
-		Console.WriteLine(hex);
-		int expected = Convert.ToInt32(hex.Substring(2), 16);
-		using (IReader reader = new Reader (new StringReader(hex+" ")))
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                int expected = random.Next();
+                string hex  = string.Format("0{0}{1} ", xOrX, expected.ToString("x"));
+		using (IReader reader = new Reader (new StringReader(hex)))
 		{
 		    Assert.True(reader.MoveNext());
-		    
 		    Token t = zeroLexer.Scan(reader);
 		    Assert.NotNull(t);
 		    Assert.Equal(expected, t.Text);
 		    Assert.Equal(TokenType.IntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(' ', reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void ZeroLexer_IntHexadecimalsEOF_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                int expected = random.Next();
+                string hex  = string.Format("0{0}{1}", xOrX, expected.ToString("x"));
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.IntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+	[Fact]
+	public void ZeroLexer_UIntHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char uOrU = (i%3 == 0)? 'u' : 'U';
+                uint expected = Convert.ToUInt32(random.Next());
+                string hex  = string.Format("0{0}{1}{2}", xOrX, expected.ToString("x"), uOrU);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.UIntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+	[Fact]
+	public void ZeroLexer_ShortHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char sOrS = (i%3 == 0)? 's' : 'S';
+                short expected = Convert.ToInt16(random.Next(15000));
+                string hex  = string.Format("0{0}{1}{2}", xOrX, expected.ToString("x"), sOrS);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.ShortConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+        }
+
+	[Fact]
+	public void ZeroLexer_UShortHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char sOrS = (i%3 == 0)? 's' : 'S';
+                char uOrU = (i%4 == 0)? 'u' : 'U';
+                ushort expected = Convert.ToUInt16(random.Next(15000));
+                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"), sOrS, uOrU);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.UShortConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+        [Fact]
+	public void ZeroLexer_ShortUHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char sOrS = (i%3 == 0)? 's' : 'S';
+                char uOrU = (i%4 == 0)? 'u' : 'U';
+                ushort expected = Convert.ToUInt16(random.Next(15000));
+                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"),uOrU, sOrS);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.UShortConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+	[Fact]
+	public void ZeroLexer_LongHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char lOrL = (i%3 == 0)? 'l' : 'L';
+                long expected = Convert.ToInt64(random.Next());
+                string hex  = string.Format("0{0}{1}{2}", xOrX, expected.ToString("x"), lOrL);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.LongConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+	[Fact]
+	public void ZeroLexer_ULongHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char lOrL = (i%3 == 0)? 'l' : 'L';
+                char uOrU = (i%4 == 0)? 'u' : 'U';
+                ulong expected = Convert.ToUInt64(random.Next());
+                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"), lOrL, uOrU);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.ULongConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+        [Fact]
+	public void ZeroLexer_LongUHexadecimals_Success()
+	{
+            Random random = new Random();
+            ILexer zeroLexer = new ZeroLexer();
+            for (int i=0; i < 100; i++)
+            {
+                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char lOrL = (i%3 == 0)? 'l' : 'L';
+                char uOrU = (i%4 == 0)? 'u' : 'U';
+                ulong expected = Convert.ToUInt64(random.Next());
+                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"), uOrU, lOrL);
+		using (IReader reader = new Reader (new StringReader(hex)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = zeroLexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.ULongConstant, t.TokenType);
 		    Assert.Equal(1, t.Line);
 		    Assert.Equal(1, t.Column);
 		    Assert.False(reader.MoveNext());
