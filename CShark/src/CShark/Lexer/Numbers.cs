@@ -3,12 +3,13 @@
 
 using System;
 using System.Text;
+using System.Diagnostics;
 
 namespace CShark.Lexer
 {
     static class NumberLexer
     {
-        internal static void AppendTill(IReader reader, Predicate<char> predicate, StringBuilder builder)
+        internal static bool AppendTill(IReader reader, Predicate<char> predicate, StringBuilder builder)
         {
             do
             {
@@ -19,9 +20,11 @@ namespace CShark.Lexer
                 else
                 {
                     reader.Revert(reader.Current);
-                    return;
+                    return true;
                 }
             } while (reader.MoveNext());
+
+            return false;
         }
 
         /// <summary>
@@ -63,7 +66,7 @@ namespace CShark.Lexer
             return Convert.ToDouble(builder.ToString());
         }
 
-        internal static Token ContinueWithSuffix(IReader reader, int numberBase, int line, int column, string text)
+        internal static Token ContinueWithSuffix(IReader reader, int fromBase, int line, int column, string text)
         {
             switch (reader.Current)
             {
@@ -86,13 +89,13 @@ namespace CShark.Lexer
                         {
                             if (reader.Current == 'u' || reader.Current == 'U')
                             {
-                                return new Token(TokenType.ULongConstant, line, column, Convert.ToUInt64(text));
+                                return new Token(TokenType.ULongConstant, line, column, Convert.ToUInt64(text, fromBase));
                             }
 
                             reader.Revert(reader.Current);
                         }
 
-                        return new Token(TokenType.LongConstant, line, column, Convert.ToInt64(text));
+                        return new Token(TokenType.LongConstant, line, column, Convert.ToInt64(text, fromBase));
                     }
 
                 case 's':
@@ -102,13 +105,13 @@ namespace CShark.Lexer
                         {
                             if (reader.Current == 'u' || reader.Current == 'U')
                             {
-                                return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(text));
+                                return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(text, fromBase));
                             }
 
                             reader.Revert(reader.Current);
                         }
 
-                        return new Token(TokenType.ShortConstant, line, column, Convert.ToInt16(text));
+                        return new Token(TokenType.ShortConstant, line, column, Convert.ToInt16(text, fromBase));
                     }
 
                 case 'u':
@@ -118,37 +121,19 @@ namespace CShark.Lexer
                         {
                             if (reader.Current == 's' || reader.Current == 'S')
                             {
-                                return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(text));
+                                return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(text, fromBase));
                             }
 
                             if (reader.Current == 'l' || reader.Current == 'L')
                             {
-                                return new Token(TokenType.ULongConstant, line, column, Convert.ToUInt64(text));
+                                return new Token(TokenType.ULongConstant, line, column, Convert.ToUInt64(text, fromBase));
                             }
                             reader.Revert(reader.Current);
                         }
 
-                        return new Token(TokenType.UIntConstant, line, column, Convert.ToUInt32(text));
+                        return new Token(TokenType.UIntConstant, line, column, Convert.ToUInt32(text, fromBase));
                     }
-                    /*
-                case '.':
-                    {
-                        double d = ReadMantissa(reader, text);
-                        if (reader.MoveNext())
-                        {
-                            if (reader.Current == 'f' || reader.Current == 'F')
-                            {
-                                return new Token(TokenType.FloatConstant, line, column, Convert.ToSingle(d));
-                            }
-                            else if (reader.Current != 'd' && reader.Current != 'D')
-                            {
-                                reader.Revert(reader.Current);
-                            }
-                        }
-
-                        return new Token(TokenType.DoubleConstant, line, column, d);
-                    }*/
-
+                    
                 default:
                     {
                         reader.Revert(reader.Current);
@@ -156,7 +141,8 @@ namespace CShark.Lexer
                     }
             }
 
-            return new Lexer.Token(TokenType.IntConstant, line, column, Convert.ToInt32(text));
+            Console.WriteLine($"text is {text}");
+            return new Lexer.Token(TokenType.IntConstant, line, column, Convert.ToInt32(text, fromBase));
         }
 
         private static TokenType ReadSuffix(IReader reader)
@@ -334,6 +320,79 @@ namespace CShark.Lexer
             }
 
             return tokenType;
+        }
+    }
+
+    internal class ZeroLexer : ILexer
+    {
+        private Token ScanDouble(IReader reader, int line, int column)
+        {
+            double dbl = 0d;
+            try
+            {
+                dbl = NumberLexer.ReadMantissa(reader, "0");
+            }
+            catch (FormatException f)
+            {
+                throw new ScannerException(f.Message, line, column);
+            }
+
+            if (reader.MoveNext())
+            {
+                if (reader.Current == 'f' || reader.Current == 'F')
+                {
+                    try
+                    {
+                        float f = Convert.ToSingle(dbl);
+                        return new Token(TokenType.FloatConstant, line, column, Convert.ToSingle(dbl));
+                    }
+                    catch (FormatException f)
+                    {
+                        throw new ScannerException(f.Message, line, column);
+                    }
+                }
+                if (reader.Current != 'd' && reader.Current != 'D')
+                {
+                    reader.Revert(reader.Current);
+                }
+            }
+
+            return new Token(TokenType.DoubleConstant, line, column, dbl);
+        }
+
+        public Token Scan(IReader reader)
+        {
+            int line = reader.Line;
+            int column = reader.Column;
+            if (reader.MoveNext())
+            {
+                if (reader.Current == '.')
+                {
+                    return ScanDouble(reader, line, column);
+                }
+                else if (reader.Current == 'x' || reader.Current == 'X')
+                {
+                    var builder = new StringBuilder();
+                    if (NumberLexer.AppendTill(reader, (c) => (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'), builder))
+                    {
+                        try
+                        {
+                            return NumberLexer.ContinueWithSuffix(reader, 16, line, column, builder.ToString());
+                        }
+                        catch (FormatException f)
+                        {
+                            throw new ScannerException(f.Message, line, column);
+                        }
+                    }
+                    return new Token(TokenType.IntConstant, line, column, Convert.ToInt32(builder.ToString(), 16));
+                }
+                else
+                {
+                    reader.Revert(reader.Current);
+                }
+            }
+
+            return new Token(TokenType.IntConstant, line, column, 0);
         }
     }
 
