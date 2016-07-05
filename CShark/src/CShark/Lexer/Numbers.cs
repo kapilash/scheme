@@ -143,12 +143,12 @@ namespace CShark.Lexer
             return new Lexer.Token(TokenType.IntConstant, line, column, Convert.ToInt32(text, fromBase));
         }
 
-        internal static Token ScanDouble(IReader reader, int line, int column)
+        internal static Token ScanDouble(IReader reader, int line, int column, string text)
         {
             double dbl = 0d;
             try
             {
-                dbl = NumberUtils.ReadMantissa(reader, "0");
+                dbl = NumberUtils.ReadMantissa(reader, text);
             }
             catch (FormatException f)
             {
@@ -189,7 +189,7 @@ namespace CShark.Lexer
             {
                 if (reader.Current == '.')
                 {
-                    return NumberUtils.ScanDouble(reader, line, column);
+                    return NumberUtils.ScanDouble(reader, line, column, "0");
                 }
                 else if (reader.Current == 'x' || reader.Current == 'X')
                 {
@@ -236,12 +236,30 @@ namespace CShark.Lexer
             {
                 if (reader.Current == '.')
                 {
-                    return NumberUtils.ScanDouble(reader, line, column);
-                }
+                    if (reader.MoveNext())
+                    {
+                        try
+                        {
+                            return NumberUtils.ScanDouble(reader, line, column, builder.ToString());
+                        }
+                        catch(FormatException f)
+                        {
+                            throw new ScannerException(f.Message, line, column);
+                        }
+                    }
 
+                    try
+                    {
+                        return new Token(TokenType.DoubleConstant, line, column, Convert.ToDouble(builder.ToString()));
+                    }
+                    catch(FormatException f)
+                    {
+                        throw new ScannerException(f.Message, line, column);
+                    }
+                }
                 try
                 {
-                    return NumberUtils.ContinueWithSuffix(reader, 16, line, column, builder.ToString());
+                    return NumberUtils.ContinueWithSuffix(reader, 10, line, column, builder.ToString());
                 }
                 catch(FormatException f)
                 {

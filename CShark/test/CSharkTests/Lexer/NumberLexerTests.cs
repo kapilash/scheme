@@ -358,5 +358,241 @@ namespace CSharkTests.Lexer
 		}
 	    }
 	}
+
+	[Fact]
+	public void NumberLexer_Doubles_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abcghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            for (int i=0; i < 100; i++)
+            {
+                double expected = Convert.ToDouble(random.Next()) + random.NextDouble();
+                char nextChar = followUps[random.Next(followUps.Length)];
+		using (IReader reader = new Reader (new StringReader(expected.ToString() + nextChar)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected.ToString(), t.Text.ToString());
+		    Assert.Equal(TokenType.DoubleConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+	[Fact]
+	public void NumberLexer_Float_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abcghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            for (int i=0; i < 100; i++)
+            {
+                float expected = Convert.ToSingle(random.Next()) + Convert.ToSingle(random.NextDouble());
+                char nextChar = followUps[random.Next(followUps.Length)];
+                char suff = (i%2 == 0) ? 'f' : 'F';
+                string inpStr = $"{expected}{suff}{nextChar}";
+                using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected.ToString(), t.Text.ToString());
+		    Assert.Equal(TokenType.FloatConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+	[Fact]
+	public void NumberLexer_IntDecimals_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            for (int i=0; i < 100; i++)
+            {
+                int expected = random.Next();
+                char nextChar = followUps[random.Next(followUps.Length)];
+		using (IReader reader = new Reader (new StringReader(expected.ToString() + nextChar)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.IntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void Lexer_IntDecimalsEOF_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            for (int i=0; i < 100; i++)
+            {
+                int expected = random.Next();
+		using (IReader reader = new Reader (new StringReader(expected.ToString())))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.IntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.False(reader.MoveNext());
+		}
+	    }
+	}
+
+        [Fact]
+	public void Lexer_UIntDecimals_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz;.; \t!@#$%^&*(),.<>/?\\\n";
+            for (int i=0; i < 100; i++)
+            {
+                uint expected = Convert.ToUInt32(random.Next());
+                char uOrU = (i % 2 == 0)? 'u' : 'U';
+                char nextChar = followUps[random.Next(followUps.Length)];
+                var inpStr = $"{expected}{uOrU}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.UIntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+		}
+	    }
+        }
+
+        [Fact]
+	public void NumberLexer_ShortInts_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            for (int i=0; i < 100; i++)
+            {
+                short expected = Convert.ToInt16(random.Next(15000));
+                char nextChar = followUps[random.Next(followUps.Length)];
+                char sOrS = (i % 2 == 0)? 's' : 'S';
+                var inpStr = $"{expected}{sOrS}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.ShortConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_LongDecimals_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            for (int i=0; i < 100; i++)
+            {
+                long expected = Convert.ToInt64(random.Next()) * Convert.ToInt64(random.Next());
+                char nextChar = followUps[random.Next(followUps.Length)];
+                char lOrL = (i % 2 == 0)? 'l' : 'L';
+                var inpStr = $"{expected}{lOrL}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.LongConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_UShortDecimals_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] suffixes = new string[] { "SU", "su", "Su", "sU" };
+            for (int i=0; i < 100; i++)
+            {
+                ushort expected = Convert.ToUInt16(random.Next(15000));
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string suffix = suffixes[random.Next(4)];
+                var inpStr = $"{expected}{suffix}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.UShortConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_ULongDecimals_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] suffixes = new string[] { "LU", "lu", "Lu", "lU" };
+            for (int i=0; i < 100; i++)
+            {
+                ulong expected = Convert.ToUInt64(random.Next()) * Convert.ToUInt64(random.Next());
+                char nextChar = followUps[random.Next(followUps.Length)];
+
+                string suffix = suffixes[random.Next(4)];
+                var inpStr = $"{expected}{suffix}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.ULongConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
     }
 }
