@@ -7,8 +7,8 @@ namespace CShark.Lexer
 {
     public enum TokenType
     {
-        Variable,
-        MuVariable,
+        Identifier,
+        MuIdentifier,
 
         IntConstant,
         LongConstant,

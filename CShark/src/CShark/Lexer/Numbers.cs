@@ -226,7 +226,7 @@ namespace CShark.Lexer
 
     internal class NumberLexer : ILexer
     {
-        public Token Scan(IReader reader)
+        public virtual Token Scan(IReader reader)
         {
             int line = reader.Line;
             int column = reader.Column;
@@ -275,6 +275,44 @@ namespace CShark.Lexer
             {
                 throw new ScannerException(f.Message, line, column);
             }
+        }
+    }
+
+    internal class SignedNumberLexer : NumberLexer
+    {
+        public override Token Scan(IReader reader)
+        {
+            char c = reader.Current;
+            int line = reader.Line;
+            int col = reader.Column;
+            if (reader.MoveNext())
+            {
+                 if ('0' <= reader.Current && '9' >= reader.Current)
+                {
+                    var token = base.Scan(reader);
+                    if (c == '+')
+                    {
+                        return new Token(token.TokenType, line, col, token.Text);
+                    }
+
+                    object obj = null;
+                    switch(token.TokenType)
+                    {
+                        case TokenType.IntConstant: obj = (-1) * (int)token.Text; break;
+                        case TokenType.DoubleConstant: obj = Convert.ToDouble((-1.0d) * (double)token.Text); break;
+                        case TokenType.LongConstant: obj = Convert.ToInt64((-1) * (long)token.Text); break;
+                        case TokenType.ShortConstant: obj = Convert.ToInt16((-1) * (short)token.Text); break;
+                        case TokenType.FloatConstant: obj = (-1) * (float)token.Text; break;
+                        default: throw new ScannerException($"Invalid {c} before {token.TokenType}", line, col);
+                    }
+
+                    return new Token(token.TokenType, line, col, obj);
+                }
+
+                reader.Revert(reader.Current);
+            }
+
+            return new Token(TokenType.Identifier, line, col, c.ToString());
         }
     }
 }

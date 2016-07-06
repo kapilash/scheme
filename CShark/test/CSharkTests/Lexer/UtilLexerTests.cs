@@ -24,7 +24,7 @@ namespace CSharkTests.Lexer
         [Fact]
         public void WhileLexer_VariableDelimiter_ScanSuccess()
         {
-            WhileLexer lexer = new WhileLexer(c => IsVariableChar(c), "variable", TokenType.Variable);
+            WhileLexer lexer = new WhileLexer(c => IsVariableChar(c), "variable", TokenType.Identifier);
             string[] variables = new string[] { "hello_a123", "HELLO", "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
                                                 "abcdefghijklmnopqrstuvwxyz", "_", "0123456789","Z","A",
                                                 "z", "a", "0" };
@@ -52,7 +52,7 @@ namespace CSharkTests.Lexer
         [Fact]
         public void WhileLexer_VariableEOF_ScanSuccess()
         {
-            WhileLexer lexer = new WhileLexer(c => IsVariableChar(c), "variable", TokenType.Variable);
+            WhileLexer lexer = new WhileLexer(c => IsVariableChar(c), "variable", TokenType.Identifier);
             string[] variables = new string[] { "hello_a123", "HELLO", "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
                                                 "abcdefghijklmnopqrstuvwxyz", "_", "0123456789","Z","A",
                                                 "z", "a", "0" };

@@ -594,5 +594,180 @@ namespace CSharkTests.Lexer
 		}
 	    }
 	}
+
+        [Fact]
+	public void NumberLexer_SignedShort_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                short expected = Convert.ToInt16(random.Next(1500));
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{expected}S{nextChar}";
+
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    int prod = (prefix == "-") ? -1 : 1;
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(Convert.ToInt16(expected * prod), t.Text);
+		    Assert.Equal(TokenType.ShortConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_SignedInt_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                int expected = random.Next();
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{expected}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    int prod = (prefix == "-") ? -1 : 1;
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected * prod, t.Text);
+		    Assert.Equal(TokenType.IntConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_SignedLong_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                long expected = Convert.ToInt64(random.Next());
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{expected}L{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    int prod = (prefix == "-") ? -1 : 1;
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected * prod, t.Text);
+		    Assert.Equal(TokenType.LongConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_SignedFloat_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                float expected = Convert.ToSingle(random.Next(999999)) + Convert.ToSingle(random.NextDouble());
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{expected}f{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    float expVal = expected * ((prefix == "-") ? -1 : 1);
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expVal.ToString(), t.Text.ToString());
+		    Assert.Equal(TokenType.FloatConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void NumberLexer_SignedDouble_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abcghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                double expected = Convert.ToDouble(random.Next()) + random.NextDouble();
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{expected}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    double expVal = expected * ((prefix == "-") ? -1d : 1d);
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		   // not working somehow - Assert.Equal(expVal, (double)(t.Text), 2);
+		    Assert.Equal(expVal.ToString(), t.Text.ToString());
+		    Assert.Equal(TokenType.DoubleConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+
+        [Fact]
+	public void SignLexer_SignAndNoNumber_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abcghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(prefix, t.Text);
+		    Assert.Equal(TokenType.Identifier, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
     }
 }
