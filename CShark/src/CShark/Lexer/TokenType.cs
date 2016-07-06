@@ -15,12 +15,9 @@ namespace CShark.Lexer
         ShortConstant,
         FloatConstant,
         DoubleConstant,
-        ByteConstant,
         UIntConstant,
         ULongConstant,
         UShortConstant,
-        UByteConstant,
-        ComplexConstant,
 
         CharConstant,
         StringConstant,
