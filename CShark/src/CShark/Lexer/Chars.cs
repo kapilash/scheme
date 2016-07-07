@@ -61,14 +61,21 @@ namespace CShark.Lexer
                         return EscapedVals[i];
                 }
 
-                if (reader.Current == 'u')
+                try
                 {
-                    return ReadNHexDigits(reader, 4);
-                }
+                    if (reader.Current == 'u')
+                    {
+                        return ReadNHexDigits(reader, 4);
+                    }
 
-                if (reader.Current == 'U')
+                    if (reader.Current == 'U')
+                    {
+                        return ReadNHexDigits(reader, 8);
+                    }
+                }
+                catch (Exception e)
                 {
-                    return ReadNHexDigits(reader, 8);
+                    throw new ScannerException(e.Message, reader.Line, reader.Column);
                 }
 
                 throw new ScannerException($"Invalid Escaped character {reader.Current}", reader.Line, reader.Column);
