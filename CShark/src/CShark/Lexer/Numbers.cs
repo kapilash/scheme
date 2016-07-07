@@ -116,23 +116,46 @@ namespace CShark.Lexer
                 case 'u':
                 case 'U':
                     {
+
                         if (reader.MoveNext())
                         {
+			    if (reader.Current == 'l' || reader.Current == 'L')
+			    {
+                                return new Token(TokenType.ULongConstant, line, column, Convert.ToUInt64(text, fromBase));
+                            }
+
                             if (reader.Current == 's' || reader.Current == 'S')
                             {
                                 return new Token(TokenType.UShortConstant, line, column, Convert.ToUInt16(text, fromBase));
                             }
 
-                            if (reader.Current == 'l' || reader.Current == 'L')
+                            if (reader.Current == 'y' || reader.Current == 'Y')
                             {
-                                return new Token(TokenType.ULongConstant, line, column, Convert.ToUInt64(text, fromBase));
+                                return new Token(TokenType.ByteConstant, line, column, Convert.ToByte(text, fromBase));
                             }
+
                             reader.Revert(reader.Current);
                         }
 
                         return new Token(TokenType.UIntConstant, line, column, Convert.ToUInt32(text, fromBase));
                     }
-                    
+
+                case 'y':
+                case 'Y':
+                    {
+                        if (reader.MoveNext())
+                        {
+                            if (reader.Current == 'u' || reader.Current == 'U')
+                            {
+                                return new Token(TokenType.ByteConstant, line, column, Convert.ToByte(text, fromBase));
+                            }
+
+                            reader.Revert(reader.Current);
+                        }
+
+                        return new Token(TokenType.SByteConstant, line, column, Convert.ToSByte(text, fromBase));
+                    }
+
                 default:
                     {
                         reader.Revert(reader.Current);
@@ -303,6 +326,7 @@ namespace CShark.Lexer
                         case TokenType.LongConstant: obj = Convert.ToInt64((-1) * (long)token.Text); break;
                         case TokenType.ShortConstant: obj = Convert.ToInt16((-1) * (short)token.Text); break;
                         case TokenType.FloatConstant: obj = (-1) * (float)token.Text; break;
+			case TokenType.SByteConstant: obj = Convert.ToSByte( (-1) * (sbyte)token.Text); break;
                         default: throw new ScannerException($"Invalid {c} before {token.TokenType}", line, col);
                     }
 

@@ -13,11 +13,13 @@ namespace CShark.Lexer
         IntConstant,
         LongConstant,
         ShortConstant,
+	SByteConstant,
         FloatConstant,
         DoubleConstant,
         UIntConstant,
         ULongConstant,
         UShortConstant,
+	ByteConstant,
 
         CharConstant,
         StringConstant,

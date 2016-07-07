@@ -10,19 +10,6 @@ namespace CSharkTests.Lexer
 {
     public class NumberLexerTests
     {
-        public readonly static object[][] UIntHexaDecimals = {
-            new object[] { "0X123u", 0X123u },
-            new object[] { "0XFFFu", 0XFFFu },
-            new object[] { "0XfffU", 0XfffU },
-            new object[] { "0XaaaU", 0XaaaU },
-            new object[] { "OXAAAu", 0XAAAu },
-            new object[] { "0xaaau", 0xaaau },
-            new object[] { "0XAaBbCcU", 0XAaBbCcU },
-            new object[] { "0xaAbBcCu", 0xaAbBcCu },
-            new object[] { "0x1239U", 0x1239U },
-            new object[] { "0X1239u", 0X1239u }
-        };
-
         [Fact]
         public void ValidMantissa_ReadMantissa_Double()
         {
@@ -97,7 +84,7 @@ namespace CSharkTests.Lexer
         }
 
 	[Fact]
-	public void ZeroLexer_ZeroEOF_IntToken()
+	public void ZeroEOF_ZeroLexer_IntToken()
 	{
 	    var zeroLexer = new ZeroLexer();
 	    using (IReader reader = new Reader(new StringReader("0")))
@@ -114,7 +101,7 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void ZeroLexer_ZeroTrail_IntToken()
+	public void ZeroTrail_ZeroLexer_IntToken()
 	{
 	    var zeroLexer = new ZeroLexer();
 	    using (IReader reader = new Reader(new StringReader("0_")))
@@ -132,13 +119,13 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void ZeroLexer_IntHexadecimals_Success()
+	public void IntHexadecimals_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char xOrX = (random.Next(2) == 0)? 'x' : 'X';
                 int expected = random.Next();
                 string hex  = string.Format("0{0}{1} ", xOrX, expected.ToString("x"));
 		using (IReader reader = new Reader (new StringReader(hex)))
@@ -157,13 +144,13 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void ZeroLexer_IntHexadecimalsEOF_Success()
+	public void IntHexadecimalsEOF_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
+                char xOrX = (random.Next(2) == 0)? 'x' : 'X';
                 int expected = random.Next();
                 string hex  = string.Format("0{0}{1}", xOrX, expected.ToString("x"));
 		using (IReader reader = new Reader (new StringReader(hex)))
@@ -181,14 +168,14 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void ZeroLexer_UIntHexadecimals_Success()
+	public void UIntHexadecimals_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
-                char uOrU = (i%3 == 0)? 'u' : 'U';
+                char xOrX = (random.Next(2) == 0)? 'x' : 'X';
+                char uOrU = (random.Next(2) == 0)? 'u' : 'U';
                 uint expected = Convert.ToUInt32(random.Next());
                 string hex  = string.Format("0{0}{1}{2}", xOrX, expected.ToString("x"), uOrU);
 		using (IReader reader = new Reader (new StringReader(hex)))
@@ -206,14 +193,14 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void ZeroLexer_ShortHexadecimals_Success()
+	public void ShortHexadecimalLiteral_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
-                char sOrS = (i%3 == 0)? 's' : 'S';
+                char xOrX = (random.Next(2) == 0)? 'x' : 'X';
+                char sOrS = (random.Next(2) == 0)? 's' : 'S';
                 short expected = Convert.ToInt16(random.Next(15000));
                 string hex  = string.Format("0{0}{1}{2}", xOrX, expected.ToString("x"), sOrS);
 		using (IReader reader = new Reader (new StringReader(hex)))
@@ -231,17 +218,16 @@ namespace CSharkTests.Lexer
         }
 
 	[Fact]
-	public void ZeroLexer_UShortHexadecimals_Success()
+	public void UShortHexadecimals_x_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
-                char sOrS = (i%3 == 0)? 's' : 'S';
-                char uOrU = (i%4 == 0)? 'u' : 'U';
+                char sOrS = (random.Next(2) == 0)? 's' : 'S';
+                char uOrU = (random.Next(2) == 0)? 'u' : 'U';
                 ushort expected = Convert.ToUInt16(random.Next(15000));
-                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"), sOrS, uOrU);
+                string hex  = string.Format("0x{0}{1}{2}", expected.ToString("x"), sOrS, uOrU);
 		using (IReader reader = new Reader (new StringReader(hex)))
 		{
 		    Assert.True(reader.MoveNext());
@@ -257,17 +243,16 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void ZeroLexer_ShortUHexadecimals_Success()
+	public void ShortUHexadecimalsLiteral_0X_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
-                char sOrS = (i%3 == 0)? 's' : 'S';
-                char uOrU = (i%4 == 0)? 'u' : 'U';
+                char sOrS = (random.Next(2) == 0)? 's' : 'S';
+                char uOrU = (random.Next(2) == 0)? 'u' : 'U';
                 ushort expected = Convert.ToUInt16(random.Next(15000));
-                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"),uOrU, sOrS);
+                string hex  = string.Format("0X{0}{1}{2}", expected.ToString("x"),uOrU, sOrS);
 		using (IReader reader = new Reader (new StringReader(hex)))
 		{
 		    Assert.True(reader.MoveNext());
@@ -283,7 +268,7 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void ZeroLexer_LongHexadecimals_Success()
+	public void LongHexaDecimal_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
@@ -308,7 +293,7 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void ZeroLexer_ULongHexadecimals_Success()
+	public void ULongHexaDecimalLiteral_0x_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
@@ -318,7 +303,7 @@ namespace CSharkTests.Lexer
                 char lOrL = (i%3 == 0)? 'l' : 'L';
                 char uOrU = (i%4 == 0)? 'u' : 'U';
                 ulong expected = Convert.ToUInt64(random.Next());
-                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"), lOrL, uOrU);
+                string hex  = string.Format("0x{1}{2}{3}", xOrX, expected.ToString("x"), lOrL, uOrU);
 		using (IReader reader = new Reader (new StringReader(hex)))
 		{
 		    Assert.True(reader.MoveNext());
@@ -334,17 +319,16 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void ZeroLexer_LongUHexadecimals_Success()
+	public void ULongHexaDecimalLiteral_0X_ZeroLexer_Success()
 	{
             Random random = new Random();
             ILexer zeroLexer = new ZeroLexer();
             for (int i=0; i < 100; i++)
             {
-                char xOrX = (i%2 == 0)? 'x' : 'X';
                 char lOrL = (i%3 == 0)? 'l' : 'L';
                 char uOrU = (i%4 == 0)? 'u' : 'U';
                 ulong expected = Convert.ToUInt64(random.Next());
-                string hex  = string.Format("0{0}{1}{2}{3}", xOrX, expected.ToString("x"), uOrU, lOrL);
+                string hex  = string.Format("0X{0}{1}{2}", expected.ToString("x"), uOrU, lOrL);
 		using (IReader reader = new Reader (new StringReader(hex)))
 		{
 		    Assert.True(reader.MoveNext());
@@ -360,7 +344,7 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void NumberLexer_Doubles_Success()
+	public void DoubleLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -385,7 +369,7 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void NumberLexer_Float_Success()
+	public void FloatLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -412,11 +396,11 @@ namespace CSharkTests.Lexer
 	}
 
 	[Fact]
-	public void NumberLexer_IntDecimals_Success()
+	public void IntLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
-            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string followUps = "abceghijkmnopqrtvwxz; \t!@#$%^&*(),<>/?\\\n";
             for (int i=0; i < 100; i++)
             {
                 int expected = random.Next();
@@ -437,7 +421,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void Lexer_IntDecimalsEOF_Success()
+	public void IntLiteralEOF_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -459,11 +443,11 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void Lexer_UIntDecimals_Success()
+	public void UIntLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
-            string followUps = "abceghijkmnopqrtvwxyz;.; \t!@#$%^&*(),.<>/?\\\n";
+            string followUps = "abceghijkmnopqrtvwxz;.; \t!@#$%^&*(),.<>/?\\\n";
             for (int i=0; i < 100; i++)
             {
                 uint expected = Convert.ToUInt32(random.Next());
@@ -485,7 +469,7 @@ namespace CSharkTests.Lexer
         }
 
         [Fact]
-	public void NumberLexer_ShortInts_Success()
+	public void ShortIntLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -512,7 +496,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_LongDecimals_Success()
+	public void LongLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -539,7 +523,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_UShortDecimals_Success()
+	public void UShortLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -567,7 +551,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_ULongDecimals_Success()
+	public void ULongLiteral_NumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new NumberLexer();
@@ -596,7 +580,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_SignedShort_Success()
+	public void ShortLiteralWithSignPrefix_SignedNumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new SignedNumberLexer();
@@ -626,11 +610,11 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_SignedInt_Success()
+	public void IntLiteralWithSignPrefix_SignedNumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new SignedNumberLexer();
-            string followUps = "abceghijkmnopqrtvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string followUps = "abceghijkmnopqrtvwxz; \t!@#$%^&*(),<>/?\\\n";
             string[] prefixes = new string[] { "-", "+"};
             for (int i=0; i < 100; i++)
             {
@@ -655,7 +639,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_SignedLong_Success()
+	public void LongConstWithSignPrefix_SignedNumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new SignedNumberLexer();
@@ -684,7 +668,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_SignedFloat_Success()
+	public void FloatLiteralWithSignPrefix_SignedNumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new SignedNumberLexer();
@@ -713,7 +697,7 @@ namespace CSharkTests.Lexer
 	}
 
         [Fact]
-	public void NumberLexer_SignedDouble_Success()
+	public void DoubleConstWithSignPrefix_SignedNumberLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new SignedNumberLexer();
@@ -742,9 +726,8 @@ namespace CSharkTests.Lexer
 	    }
 	}
 
-
         [Fact]
-	public void SignLexer_SignAndNoNumber_Success()
+	public void SignAndNoNumber_SignLexer_Success()
 	{
             Random random = new Random();
             ILexer lexer = new SignedNumberLexer();
@@ -762,6 +745,92 @@ namespace CSharkTests.Lexer
 		    Assert.NotNull(t);
 		    Assert.Equal(prefix, t.Text);
 		    Assert.Equal(TokenType.Identifier, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void ByteLiteralWithSignPrefix_SignedNumberLexer_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new SignedNumberLexer();
+            string followUps = "abcdefghijklmnopqrstvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] prefixes = new string[] { "-", "+"};
+            for (int i=0; i < 100; i++)
+            {
+                sbyte expected = Convert.ToSByte(random.Next(128));
+                char nextChar = followUps[random.Next(followUps.Length)];
+                string prefix = prefixes[random.Next(2)];
+                var inpStr = $"{prefix}{expected}y{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    int prod = (prefix == "-") ? -1 : 1;
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(Convert.ToSByte(expected * prod), t.Text);
+		    Assert.Equal(TokenType.SByteConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void UnsignedByteLiteral_NumberLexer_Success()
+	{
+            Random random = new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abcdefghijklmnopqrstuvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            string[] suffixes = new string[] { "YU", "yu", "Yu", "yU" };
+            for (int i=0; i < 100; i++)
+            {
+                byte expected = Convert.ToByte(random.Next(256));
+                char nextChar = followUps[random.Next(followUps.Length)];
+
+                string suffix = suffixes[random.Next(4)];
+                var inpStr = $"{expected}{suffix}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.ByteConstant, t.TokenType);
+		    Assert.Equal(1, t.Line);
+		    Assert.Equal(1, t.Column);
+		    Assert.True(reader.MoveNext());
+                    Assert.Equal(nextChar, reader.Current);
+		}
+	    }
+	}
+
+        [Fact]
+	public void SByteLiteral_NumberLexer_Success()
+	{
+	    Random random =new Random();
+            ILexer lexer = new NumberLexer();
+            string followUps = "abcdefghijklmnopqrstvwxyz; \t!@#$%^&*(),<>/?\\\n";
+            for (int i=0; i < 128; i++)
+            {
+                sbyte expected = Convert.ToSByte(i);
+                char nextChar = followUps[random.Next(followUps.Length)];
+		char suffix = (random.Next(2) == 0) ? 'y' : 'Y';
+
+                var inpStr = $"{expected}{suffix}{nextChar}";
+		using (IReader reader = new Reader (new StringReader(inpStr)))
+		{
+		    Assert.True(reader.MoveNext());
+		    Token t = lexer.Scan(reader);
+		    Assert.NotNull(t);
+		    Assert.Equal(expected, t.Text);
+		    Assert.Equal(TokenType.SByteConstant, t.TokenType);
 		    Assert.Equal(1, t.Line);
 		    Assert.Equal(1, t.Column);
 		    Assert.True(reader.MoveNext());
