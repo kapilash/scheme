@@ -86,7 +86,6 @@ namespace CShark.Lexer
 
         public Token Scan(IReader reader)
         {
-
             int line = reader.Line;
             int column = reader.Column;
             if (!reader.MoveNext())
@@ -98,6 +97,34 @@ namespace CShark.Lexer
             }
 
             throw new ScannerException("Invalid Char", line, column);
+        }
+    }
+
+    internal class StringLexer : ILexer
+    {
+        public Token Scan(IReader reader)
+        {
+            int line = reader.Line;
+            int column = reader.Column;
+            var strb = new StringBuilder();
+            bool found = false;
+            while (reader.MoveNext())
+            {
+                if (reader.Current == '"')
+                {
+                    found = true;
+                    break;
+                }
+
+                if (reader.Current == '\r' || reader.Current == '\n')
+                    throw new ScannerException("Unexpected EOL in a string", line, column);
+
+                strb.Append(CharLexer.ScanChar(reader));
+            }
+            if (!found)
+                throw new ScannerException("Unexpected EOF", line, column);
+
+            return new Token(TokenType.StringConstant, line, column, strb.ToString());
         }
     }
 }

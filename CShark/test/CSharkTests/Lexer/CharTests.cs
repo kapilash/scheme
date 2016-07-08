@@ -185,5 +185,71 @@ namespace CSharkTests.Lexer
                 }
             }
         }
+
+        [Fact]
+        public void EmptyString_StringLexer_Success()
+        {
+            var lexer = new StringLexer();
+            using (IReader reader = new Reader(new StringReader("\"\"")))
+            {
+                Assert.True(reader.MoveNext());
+                Token t = lexer.Scan(reader);
+                Assert.NotNull(t);
+                Assert.Equal(TokenType.StringConstant, t.TokenType);
+                Assert.Equal(string.Empty, t.Text);
+                Assert.False(reader.MoveNext());
+            }
+        }
+
+        [Fact]
+        public void StringWithSlashR_StringLexer_Throws()
+        {
+            var lexer = new StringLexer();
+            using (IReader reader = new Reader(new StringReader("\"\r\"")))
+            {
+                Assert.True(reader.MoveNext());
+                Assert.Throws<ScannerException>(() => lexer.Scan(reader));
+            }
+        }
+
+        [Fact]
+        public void StringWithSlashN_StringLexer_Throws()
+        {
+            var lexer = new StringLexer();
+            using (IReader reader = new Reader(new StringReader("\"\n\"")))
+            {
+                Assert.True(reader.MoveNext());
+                Assert.Throws<ScannerException>(() => lexer.Scan(reader));
+            }
+        }
+
+        [Fact]
+        public void HundredCharString_StringLexer_Match()
+        {
+            var random = new Random();
+            var lexer = new StringLexer();
+            var strb = new StringBuilder("\"");
+            for (int i=0; i<100; i++)
+            {
+                char c = Convert.ToChar(random.Next(Char.MaxValue));
+                while (c == '\\' || c == '\r' || c == '\n' || c == '"')
+                {
+                     c = Convert.ToChar(random.Next(Char.MaxValue));
+                }
+
+                strb.Append(c);
+            }
+            strb.Append('\"');
+            using (IReader reader = new Reader(new StringReader(strb.ToString())))
+            {
+                Assert.True(reader.MoveNext());
+                Token t = lexer.Scan(reader);
+                Assert.NotNull(t);
+                Assert.Equal(TokenType.StringConstant, t.TokenType);
+                Assert.Equal(strb.ToString(), "\"" + t.Text + "\"");
+                Assert.False(reader.MoveNext());
+
+            }
+        }
     }
 }
