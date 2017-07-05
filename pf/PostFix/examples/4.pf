@@ -1,0 +1,3 @@
+( # subtraction example
+postfix 1 4 sub
+)

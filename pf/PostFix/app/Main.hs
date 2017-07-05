@@ -11,7 +11,7 @@ main = do
     file:rest -> do 
       parsed <- parsePFile file
       case parsed of
-        Left err -> do { putStrLn err; return () }
+        Left err -> do { print err; return () }
         Right prog -> case runProgram prog (map read rest) of
                         Left err -> print err
                         Right v  -> print v
