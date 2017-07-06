@@ -1,0 +1,4 @@
+(postfix 5 add mul sub swap div)
+# Given 7 6 5 4 3 as input must return -20
+# but we get -21 because haskell div is truncated to wards -infinity
+
