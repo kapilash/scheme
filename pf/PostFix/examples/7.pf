@@ -1,0 +1,2 @@
+(postfix 3 4000 swap pop add)
+# 300 20 1 gives 4020
