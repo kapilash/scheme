@@ -48,5 +48,12 @@ validCases = [
    ValidCase "(postfix 1 1 nget mul)" [5] 25,
    ValidCase "(postfix 4 4 nget 5 nget mul mul swap 4 nget mul add add)" [3,4,5,2] 25,
    ValidCase "(postfix 1 (2 mul) exec)" [7] 14,
-   ValidCase "(postfix 0 (0 swap sub) 7 swap exec)" [] (-7)
+   ValidCase "(postfix 0 (0 swap sub) 7 swap exec)" [] (-7),
+   ValidCase "(postfix 1 2 3 sel)" [1] 2,
+   ValidCase "(postfix 1 2 3 sel)" [0] 3,
+   ValidCase "(postfix 1 2 3 sel)" [17] 2,
+   ValidCase "(postfix 4 lt (add) (mul) sel exec)" [3,4,5,6] 30,
+   ValidCase "(postfix 4 lt (add) (mul) sel exec)" [4,3,5,6] 11,
+   ValidCase "(postfix 1 1 nget 0 lt (0 swap sub) () sel exec)" [-7] 7,
+   ValidCase "(postfix 1 1 nget 0 lt (0 swap sub) () sel exec)" [6] 6
   ]
