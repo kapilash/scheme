@@ -7,6 +7,8 @@ import Text.Parsec.String
 parsePFile :: FilePath -> IO (Either ParseError PFProgram)
 parsePFile fileName = parseFromFile pfProg fileName
 
+parseStr :: String -> Either ParseError PFProgram
+parseStr s = parse pfProg "instring" s
 
 parseCmdStr :: Parser String
 parseCmdStr = try (string "sub")

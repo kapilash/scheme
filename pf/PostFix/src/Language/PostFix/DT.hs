@@ -9,6 +9,7 @@ data PFError = PFInvalidArgCount Int Int
              | PFInvalidOper String
              | PFNonNumber
              | PFStackEmpty
+             | InvalidProg
              deriving Show
 
 data PFElem = PFNumber Int
@@ -71,6 +72,7 @@ instance Monad PFCommand where
 
   
 data PFProgram = PFProgram [PFElem] Int
+               deriving Show
 
 runProgram :: PFProgram -> [Int] -> Either PFError PFElem
 runProgram (PFProgram commands argCount) list
@@ -138,7 +140,10 @@ divide = do
   i2 <- readNum
   if i1 == 0
     then fail "divide by zero"
-    else writeNum $ i2 `div` i1
+    else do
+    let v = i2 `div` i1
+    let v' = if v < 0 then (v + 1) else v
+    writeNum v'
     
 remainder :: PFCommand ()
 remainder = do
@@ -183,7 +188,7 @@ exec :: PFCommand ()
 exec = do
   n <- nextElem
   case n of
-    PFSeq s -> mapM_ pushCmd s
+    PFSeq s -> mapM_ pushCmd (reverse s)
     _       -> fail "Not sequence"
 
 cmdMapping = [
@@ -205,7 +210,6 @@ cmdMapping = [
   
 
 interpreter :: PFEnv -> Either PFError PFElem
-interpreter (PFEnv [] _ _) =  Left PFStackEmpty
 interpreter (PFEnv stack [] _) = Right $ head stack
 interpreter (PFEnv stack (e:elems) defs) =
   case e of                                     

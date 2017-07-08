@@ -1,0 +1,4 @@
+(postfix 0 (0 swap sub) 7 swap exec)
+# 0 swap sub is negation subroutine
+# takes nothing and returns -7
+
