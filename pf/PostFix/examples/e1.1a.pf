@@ -1,0 +1,1 @@
+(postfix 0 10 (swap 2 mul sub) 1 swap exec)
