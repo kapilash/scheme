@@ -1,0 +1,88 @@
+cmake_minimum_required (VERSION 3.12)
+
+project(schrapnel VERSION 0.9 LANGUAGES CXX)
+
+Set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_LIBS ON)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS system filesystem unit_test_framework iostreams date_time)
+message(STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}")
+find_package(CURL REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
+find_package(RocksDB CONFIG REQUIRED)
+FIND_PACKAGE (Threads REQUIRED )
+find_package(OpenSSL REQUIRED)
+find_package(glog CONFIG REQUIRED)
+find_package(cityhash CONFIG REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(Snappy CONFIG REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
+find_package(Snappy CONFIG REQUIRED)
+find_package(lz4 CONFIG REQUIRED)
+find_library(ORC_LIBRARY NAMES orc)
+find_package(absl CONFIG REQUIRED)
+find_package(benchmark CONFIG REQUIRED)
+find_package(unofficial-libuv CONFIG REQUIRED)
+find_package(zstd CONFIG REQUIRED)
+find_package(OpenMP)
+
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+ add_compile_options(-std=c++14 -stdlib=libc++ -O2)
+ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+ add_compile_options(-std=c++14 -O2)
+ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+ add_compile_options( -openmp:experimental /FAc)
+endif()
+
+include(GenerateExportHeader)
+include_directories(${schrapnel_SOURCE_DIR} ${schrapnel_SOURCE_DIR}/relations)
+
+
+set(SOURCES
+   Stork.h
+   Stork.cpp
+   )
+
+
+add_library(stork SHARED ${SOURCES})
+
+target_link_libraries(stork PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(stork PRIVATE ${CURL_LIBRARIES})
+target_link_libraries(stork PRIVATE ${Boost_LIBRARIES}  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(stork PRIVATE RocksDB::rocksdb RocksDB::rocksdb-shared)
+target_link_libraries(stork PRIVATE ${Boost_LIBRARIES}  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(stork PRIVATE cityhash)
+target_link_libraries(stork PRIVATE Snappy::snappy)
+target_link_libraries(stork PRIVATE lz4::lz4)
+target_link_libraries(stork PRIVATE ZLIB::ZLIB)
+target_link_libraries(stork PRIVATE libzstd)
+target_link_libraries(stork PRIVATE absl::any absl::base absl::bits absl::city)
+target_link_libraries(stork PRIVATE unofficial::libuv::libuv)
+target_link_libraries(stork PRIVATE glog::glog)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(stork PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
+ 
+add_executable(storkTests Scanner.cpp ${SOURCES})
+target_link_libraries(storkTests PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(storkTests PRIVATE ${CURL_LIBRARIES})
+target_link_libraries(storkTests PRIVATE ${Boost_LIBRARIES}  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(storkTests PRIVATE RocksDB::rocksdb RocksDB::rocksdb-shared)
+target_link_libraries(storkTests PRIVATE ${Boost_LIBRARIES}  ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(storkTests PRIVATE cityhash)
+target_link_libraries(storkTests PRIVATE Snappy::snappy)
+target_link_libraries(storkTests PRIVATE lz4::lz4)
+target_link_libraries(storkTests PRIVATE ZLIB::ZLIB)
+target_link_libraries(storkTests PRIVATE libzstd)
+target_link_libraries(storkTests PRIVATE absl::any absl::base absl::bits absl::city)
+target_link_libraries(storkTests PRIVATE unofficial::libuv::libuv)
+target_link_libraries(storkTests PRIVATE glog::glog)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(storkTests PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
